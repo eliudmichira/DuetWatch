@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rtk ls *)",
+      "Bash(mkdir -p \"C:/Users/User/Documents/GitHub/pausepal/extension/vendor\")",
+      "Bash(rtk curl *)",
+      "Bash(rtk grep *)",
+      "Bash(rtk git *)"
+    ]
+  }
+}
