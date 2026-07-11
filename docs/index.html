@@ -4,203 +4,473 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Duet — Watch videos together, in sync</title>
-  <meta name="description" content="Duet syncs play, pause, and seek between two browsers in real time. Watch together on any HTML5 video site." />
+  <meta name="description" content="Duet syncs play, pause, and seek between two browsers in real time. Watch together on any HTML5 video site — free, fast, and private." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg:      #0f1117;
-      --surface: #1a1d27;
-      --border:  #2a2d3a;
-      --accent:  #7c6ff7;
-      --accent2: #5eead4;
-      --text:    #e2e8f0;
-      --muted:   #94a3b8;
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
 
+    :focus { outline: none; }
+    :focus-visible {
+      outline: 2px solid rgba(139, 92, 246, 0.55);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    :root {
+      --bg-0:    #08070d;
+      --bg-1:    #0f0d18;
+      --surface: rgba(255,255,255,0.04);
+      --surface-2: rgba(255,255,255,0.06);
+      --border:  rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.14);
+      --text:    #f4f1ea;
+      --muted:   #8a8597;
+      --muted-2: #5a5668;
+
+      --coral:   #ff8a6b;
+      --peach:   #ffc89a;
+      --violet:  #8b5cf6;
+      --indigo:  #6366f1;
+      --rose:    #f472b6;
+      --success: #5ee2a0;
+      --danger:  #ff6b7a;
+
+      --radius:    16px;
+      --radius-sm: 10px;
+
+      --emboss-rim:       inset 0 1px 0 rgba(255,255,255,0.45);
+      --emboss-rim-soft:  inset 0 1px 0 rgba(255,255,255,0.10);
+      --emboss-rim-faint: inset 0 1px 0 rgba(255,255,255,0.06);
+      --emboss-base:      inset 0 -2px 4px rgba(0,0,0,0.18);
+      --emboss-base-soft: inset 0 -1px 2px rgba(0,0,0,0.12);
+
+      --lift-primary:    0 8px 20px rgba(255,138,107,0.40);
+      --lift-primary-hi: 0 12px 28px rgba(255,138,107,0.50);
+      --lift-primary-lo: 0 3px 10px rgba(255,138,107,0.30);
+      --lift-neutral:    0 6px 16px rgba(0,0,0,0.35);
+      --lift-neutral-hi: 0 10px 22px rgba(0,0,0,0.45);
+      --lift-small:      0 3px 8px rgba(0,0,0,0.30);
+      --lift-small-hi:   0 6px 14px rgba(0,0,0,0.40);
+
+      --recess: inset 0 1px 2px rgba(0,0,0,0.35), inset 0 -1px 0 rgba(255,255,255,0.04);
+    }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(180deg, #0c0a14 0%, var(--bg-0) 100%);
       color: var(--text);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      letter-spacing: -0.005em;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Atmospheric background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255,138,107,0.20), transparent 42%),
+        radial-gradient(circle at 85% 25%, rgba(139,92,246,0.22), transparent 45%),
+        radial-gradient(circle at 50% 95%, rgba(244,114,182,0.16), transparent 50%);
+      filter: blur(6px);
+      animation: drift 22s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+      pointer-events: none;
+      mix-blend-mode: overlay;
+      z-index: 0;
+    }
+    @keyframes drift {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(-4%, 3%) rotate(8deg); }
     }
 
     /* ── Nav ── */
     nav {
+      position: sticky; top: 0; z-index: 10;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.2rem 2rem;
+      padding: 1rem 2rem;
       border-bottom: 1px solid var(--border);
-      background: rgba(15,17,23,.8);
-      backdrop-filter: blur(12px);
-      position: sticky; top: 0; z-index: 10;
+      background: rgba(8,7,13,0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.04);
     }
 
     .nav-logo {
-      display: flex; align-items: center; gap: .6rem;
-      font-weight: 700; font-size: 1.1rem;
-      text-decoration: none; color: var(--text);
+      display: flex; align-items: center; gap: .65rem;
+      text-decoration: none;
     }
 
-    .nav-logo .icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
+    .logo-mark {
+      position: relative;
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: conic-gradient(
+        from 210deg,
+        #ffd9b3, var(--peach), var(--coral), var(--rose),
+        #c084fc, var(--violet), var(--indigo), #22d3ee,
+        var(--success), #ffd9b3
+      );
+      display: grid;
+      place-items: center;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.22) inset,
+        0 8px 24px rgba(255,138,107,0.35),
+        0 8px 24px rgba(244,114,182,0.30),
+        0 8px 28px rgba(139,92,246,0.32);
+      animation: rotate 14s linear infinite, logo-pulse 3.6s ease-in-out infinite;
+    }
+    .logo-mark::before {
+      content: '';
+      position: absolute; inset: 3px;
+      border-radius: 7px;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,200,154,0.12), transparent 55%),
+        radial-gradient(circle at 75% 80%, rgba(139,92,246,0.14), transparent 55%),
+        linear-gradient(180deg, rgba(15,13,24,0.94), rgba(8,7,13,0.97));
+    }
+    .logo-mark svg {
+      position: relative; z-index: 1;
+      width: 13px; height: 13px;
+      filter: drop-shadow(0 0 6px rgba(255,200,154,0.4));
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+    @keyframes logo-pulse {
+      0%,100% {
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,0.22) inset,
+          0 8px 24px rgba(255,138,107,0.35),
+          0 8px 24px rgba(244,114,182,0.30),
+          0 8px 28px rgba(139,92,246,0.32);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,0.30) inset,
+          0 10px 30px rgba(255,138,107,0.50),
+          0 10px 30px rgba(244,114,182,0.45),
+          0 12px 36px rgba(139,92,246,0.48);
+      }
     }
 
-    .nav-logo span {
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    .logo-text {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--coral), var(--rose), var(--violet));
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
     }
 
-    nav a.nav-link {
+    .nav-link {
+      font-size: .85rem;
+      font-weight: 500;
       color: var(--muted);
       text-decoration: none;
-      font-size: .9rem;
       transition: color .2s;
     }
-    nav a.nav-link:hover { color: var(--text); }
+    .nav-link:hover { color: var(--text); }
 
     /* ── Hero ── */
     .hero {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      position: relative; z-index: 1;
       text-align: center;
       padding: 6rem 1.5rem 4rem;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,111,247,.2) 0%, transparent 70%),
-        var(--bg);
     }
 
-    .badge {
-      display: inline-block;
-      background: rgba(124,111,247,.15);
-      border: 1px solid rgba(124,111,247,.3);
-      color: var(--accent);
-      font-size: .8rem;
-      font-weight: 600;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      padding: .3rem .9rem;
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+      border: 1px solid var(--border);
       border-radius: 999px;
-      margin-bottom: 1.5rem;
+      padding: 5px 14px 5px 10px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+      box-shadow: var(--lift-small), var(--emboss-rim-soft), var(--emboss-base-soft);
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success), 0 0 0 3px rgba(94,226,160,0.12);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 10px var(--success), 0 0 0 3px rgba(94,226,160,0.12); }
+      50%     { box-shadow: 0 0 14px var(--success), 0 0 0 6px rgba(94,226,160,0.04); }
     }
 
     .hero h1 {
-      font-size: clamp(2.2rem, 6vw, 4rem);
-      font-weight: 800;
-      line-height: 1.15;
-      margin-bottom: 1.2rem;
-      max-width: 700px;
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: clamp(2.4rem, 7vw, 4.5rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.1rem;
     }
 
     .hero h1 em {
-      font-style: normal;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      font-style: italic;
+      background: linear-gradient(110deg, var(--peach), var(--rose) 45%, var(--violet));
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
     }
 
     .hero p {
       color: var(--muted);
-      font-size: 1.15rem;
-      max-width: 520px;
+      font-size: 1.05rem;
+      line-height: 1.65;
+      max-width: 500px;
       margin: 0 auto 2.5rem;
-      line-height: 1.7;
     }
 
     .hero-actions {
       display: flex;
-      gap: 1rem;
+      gap: .85rem;
       flex-wrap: wrap;
       justify-content: center;
     }
 
+    /* ── Buttons — same 3D emboss as popup ── */
     .btn {
       display: inline-flex;
       align-items: center;
       gap: .5rem;
-      padding: .75rem 1.6rem;
-      border-radius: 8px;
-      font-weight: 600;
+      padding: 13px 26px;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
       font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
       text-decoration: none;
-      transition: transform .15s, box-shadow .15s;
+      transition: transform 0.15s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+      border: none;
     }
-
-    .btn:hover { transform: translateY(-2px); }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent), #6457e8);
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(124,111,247,.35);
+      color: #14111c;
+      background: linear-gradient(180deg, var(--peach) 0%, var(--coral) 50%, var(--rose) 100%);
+      box-shadow:
+        0 8px 20px rgba(255,138,107,0.40),
+        inset 0 1px 0 rgba(255,255,255,0.45),
+        inset 0 -2px 4px rgba(0,0,0,0.18);
     }
-    .btn-primary:hover { box-shadow: 0 6px 28px rgba(124,111,247,.5); }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 12px 28px rgba(255,138,107,0.50),
+        inset 0 1px 0 rgba(255,255,255,0.55),
+        inset 0 -2px 4px rgba(0,0,0,0.18);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow:
+        0 3px 10px rgba(255,138,107,0.30),
+        inset 0 1px 0 rgba(255,255,255,0.30),
+        inset 0 -1px 2px rgba(0,0,0,0.12);
+    }
 
-    .btn-ghost {
-      background: var(--surface);
-      color: var(--text);
+    .btn-secondary {
+      background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04));
       border: 1px solid var(--border);
+      color: var(--text);
+      box-shadow:
+        0 6px 16px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        inset 0 -2px 4px rgba(0,0,0,0.20);
+    }
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+      box-shadow:
+        0 10px 22px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        inset 0 -2px 4px rgba(0,0,0,0.20);
     }
 
-    /* ── Steps ── */
+    /* ── How it works ── */
+    .section {
+      position: relative; z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 6rem;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      margin-bottom: 2rem;
+      color: var(--muted-2);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .section-label::before, .section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
     .steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1.5rem;
-      max-width: 860px;
-      margin: 5rem auto 0;
-      padding: 0 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 1rem;
     }
 
     .step {
-      background: var(--surface);
+      position: relative;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(255,138,107,0.08), transparent 45%),
+        radial-gradient(circle at 100% 100%, rgba(139,92,246,0.08), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%),
+        var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      text-align: left;
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      overflow: hidden;
+      box-shadow: var(--lift-neutral), var(--emboss-rim-soft), var(--emboss-base);
+      transition: transform .2s ease, box-shadow .25s ease;
+    }
+
+    .step:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--lift-neutral-hi), var(--emboss-rim-soft), var(--emboss-base);
+    }
+
+    /* gradient border */
+    .step::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: var(--radius);
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,138,107,0.30), transparent 40%, transparent 60%, rgba(139,92,246,0.30));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+              mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+      opacity: .5;
     }
 
     .step-num {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      font-weight: 700;
+      width: 30px; height: 30px;
+      background: linear-gradient(180deg, var(--peach) 0%, var(--coral) 50%, var(--rose) 100%);
       border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: .85rem;
+      display: grid; place-items: center;
+      color: #14111c;
       margin-bottom: 1rem;
-      color: #fff;
+      box-shadow:
+        0 4px 12px rgba(255,138,107,0.40),
+        inset 0 1px 0 rgba(255,255,255,0.45),
+        inset 0 -1px 2px rgba(0,0,0,0.18);
     }
 
-    .step h3 { font-size: 1rem; margin-bottom: .4rem; }
-    .step p { color: var(--muted); font-size: .9rem; line-height: 1.5; margin: 0; }
+    .step h3 {
+      font-size: .95rem;
+      font-weight: 600;
+      margin-bottom: .4rem;
+      color: var(--text);
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: .875rem;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ── Features strip ── */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      justify-content: center;
+      max-width: 700px;
+      margin: 3.5rem auto 0;
+    }
+
+    .feat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 13px;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--muted);
+      box-shadow: var(--lift-small), var(--emboss-rim-faint), var(--emboss-base-soft);
+    }
+
+    .feat-pill .icon {
+      font-size: .9rem;
+    }
 
     /* ── Footer ── */
     footer {
+      position: relative; z-index: 1;
       text-align: center;
-      padding: 2.5rem 1.5rem;
+      padding: 2rem 1.5rem;
       border-top: 1px solid var(--border);
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: .95rem;
       color: var(--muted);
-      font-size: .875rem;
-      margin-top: 5rem;
     }
 
-    footer a { color: var(--accent); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    footer span {
+      background: linear-gradient(110deg, var(--coral), var(--rose), var(--violet));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
 
-    @media (max-width: 500px) {
+    footer a { color: var(--coral); text-decoration: none; }
+    footer a:hover { color: var(--peach); }
+
+    @media (max-width: 600px) {
       nav { padding: 1rem; }
+      .hero { padding: 4rem 1rem 3rem; }
+      .section { padding: 0 1rem 4rem; }
       .steps { grid-template-columns: 1fr; }
     }
   </style>
@@ -209,54 +479,77 @@
 
 <nav>
   <a class="nav-logo" href="index.html">
-    <div class="icon">🎬</div>
-    <span>Duet</span>
+    <div class="logo-mark">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="3.5" height="10" rx="1" fill="#f4f1ea" opacity="0.9"/>
+        <rect x="8.5" y="2" width="3.5" height="10" rx="1" fill="#f4f1ea" opacity="0.9"/>
+      </svg>
+    </div>
+    <span class="logo-text">Duet</span>
   </a>
   <a class="nav-link" href="privacy.html">Privacy Policy</a>
 </nav>
 
 <section class="hero">
-  <span class="badge">Chrome Extension</span>
-  <h1>Watch videos together,<br /><em>in perfect sync</em></h1>
-  <p>Pause, play, and seek stay in lockstep across two screens. Watch together on any HTML5 video site — free, fast, and private.</p>
+  <div class="status-pill">
+    <div class="dot"></div>
+    Chrome Extension · Free
+  </div>
+
+  <h1>Watch videos together,<br/><em>in perfect sync</em></h1>
+
+  <p>Pause, play, and seek stay in lockstep across two screens. No screen sharing, no lag, no accounts — just press play.</p>
+
   <div class="hero-actions">
     <a class="btn btn-primary" href="https://chrome.google.com/webstore" target="_blank" rel="noopener">
-      Add to Chrome
+      Add to Chrome — it's free
     </a>
-    <a class="btn btn-ghost" href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">
+    <a class="btn btn-secondary" href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">
       View on GitHub
     </a>
   </div>
 
+  <div class="features">
+    <span class="feat-pill"><span class="icon">⚡</span> Real-time sync</span>
+    <span class="feat-pill"><span class="icon">💬</span> Chat &amp; reactions</span>
+    <span class="feat-pill"><span class="icon">🔒</span> No accounts needed</span>
+    <span class="feat-pill"><span class="icon">🎬</span> Any HTML5 video</span>
+    <span class="feat-pill"><span class="icon">🌐</span> YouTube, Vimeo &amp; more</span>
+    <span class="feat-pill"><span class="icon">🎯</span> Drift correction</span>
+  </div>
+</section>
+
+<div class="section">
+  <div class="section-label">How it works</div>
+
   <div class="steps">
     <div class="step">
-      <div class="step-num">1</div>
+      <div class="step-num">01</div>
       <h3>Install on both browsers</h3>
-      <p>You and your partner each add Duet to Chrome.</p>
+      <p>You and your partner each add Duet to Chrome — takes about 10 seconds.</p>
     </div>
     <div class="step">
-      <div class="step-num">2</div>
+      <div class="step-num">02</div>
       <h3>Create a room</h3>
       <p>One person clicks "Create a room" and shares the 6-character code.</p>
     </div>
     <div class="step">
-      <div class="step-num">3</div>
+      <div class="step-num">03</div>
       <h3>Open the same video</h3>
-      <p>Both of you navigate to the same video on any HTML5 site.</p>
+      <p>Both navigate to the same video on YouTube, Vimeo, or any HTML5 site.</p>
     </div>
     <div class="step">
-      <div class="step-num">4</div>
+      <div class="step-num">04</div>
       <h3>Press play. You're in sync.</h3>
       <p>Every pause, seek, and reaction stays in lockstep automatically.</p>
     </div>
   </div>
-</section>
+</div>
 
 <footer>
-  <p>&copy; 2026 Duet &nbsp;&middot;&nbsp;
-    <a href="privacy.html">Privacy Policy</a> &nbsp;&middot;&nbsp;
-    <a href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">GitHub</a>
-  </p>
+  <span>watch together</span> &nbsp;·&nbsp; © 2026 Duet &nbsp;·&nbsp;
+  <a href="privacy.html">Privacy Policy</a> &nbsp;·&nbsp;
+  <a href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
 </body>

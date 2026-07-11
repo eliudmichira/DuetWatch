@@ -7,116 +7,290 @@
   <meta name="description" content="Privacy policy for the Duet browser extension — watch videos in sync with a partner." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    :focus { outline: none; }
+    :focus-visible {
+      outline: 2px solid rgba(139, 92, 246, 0.55);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
     :root {
-      --bg:       #0f1117;
-      --surface:  #1a1d27;
-      --border:   #2a2d3a;
-      --accent:   #7c6ff7;
-      --accent2:  #5eead4;
-      --text:     #e2e8f0;
-      --muted:    #94a3b8;
-      --code-bg:  #1e2130;
-      --radius:   12px;
+      --bg-0:    #08070d;
+      --bg-1:    #0f0d18;
+      --surface: rgba(255,255,255,0.04);
+      --surface-2: rgba(255,255,255,0.06);
+      --border:  rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.14);
+      --text:    #f4f1ea;
+      --muted:   #8a8597;
+      --muted-2: #5a5668;
+
+      --coral:   #ff8a6b;
+      --peach:   #ffc89a;
+      --violet:  #8b5cf6;
+      --indigo:  #6366f1;
+      --rose:    #f472b6;
+      --success: #5ee2a0;
+      --danger:  #ff6b7a;
+
+      --radius:    16px;
+      --radius-sm: 10px;
+
+      --emboss-rim:       inset 0 1px 0 rgba(255,255,255,0.45);
+      --emboss-rim-soft:  inset 0 1px 0 rgba(255,255,255,0.10);
+      --emboss-rim-faint: inset 0 1px 0 rgba(255,255,255,0.06);
+      --emboss-base:      inset 0 -2px 4px rgba(0,0,0,0.18);
+      --emboss-base-soft: inset 0 -1px 2px rgba(0,0,0,0.12);
+
+      --lift-primary:    0 8px 20px rgba(255,138,107,0.40);
+      --lift-primary-hi: 0 12px 28px rgba(255,138,107,0.50);
+      --lift-primary-lo: 0 3px 10px rgba(255,138,107,0.30);
+      --lift-neutral:    0 6px 16px rgba(0,0,0,0.35);
+      --lift-neutral-hi: 0 10px 22px rgba(0,0,0,0.45);
+      --lift-small:      0 3px 8px rgba(0,0,0,0.30);
+      --lift-small-hi:   0 6px 14px rgba(0,0,0,0.40);
+
+      --recess: inset 0 1px 2px rgba(0,0,0,0.35), inset 0 -1px 0 rgba(255,255,255,0.04);
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(180deg, #0c0a14 0%, var(--bg-0) 100%);
       color: var(--text);
-      line-height: 1.75;
-      font-size: 16px;
+      min-height: 100vh;
+      letter-spacing: -0.005em;
+      position: relative;
     }
 
-    /* ── Header ── */
-    header {
-      background: linear-gradient(135deg, #1a1d27 0%, #12141f 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 2.5rem 1.5rem;
-      text-align: center;
+    /* Atmospheric background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255,138,107,0.18), transparent 42%),
+        radial-gradient(circle at 85% 25%, rgba(139,92,246,0.20), transparent 45%),
+        radial-gradient(circle at 50% 95%, rgba(244,114,182,0.14), transparent 50%);
+      filter: blur(6px);
+      animation: drift 22s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      mix-blend-mode: overlay;
+      z-index: 0;
+    }
+    @keyframes drift {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(-4%, 3%) rotate(8deg); }
     }
 
-    .logo {
-      display: inline-flex;
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      display: flex;
       align-items: center;
-      gap: .6rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text);
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,7,13,0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: .6rem;
       text-decoration: none;
-      margin-bottom: 1rem;
     }
 
-    .logo span {
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    .logo-mark {
+      position: relative;
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      background: conic-gradient(
+        from 210deg,
+        #ffd9b3, var(--peach), var(--coral), var(--rose),
+        #c084fc, var(--violet), var(--indigo), #22d3ee,
+        var(--success), #ffd9b3
+      );
+      display: grid;
+      place-items: center;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.22) inset,
+        0 6px 18px rgba(255,138,107,0.35),
+        0 6px 18px rgba(244,114,182,0.28),
+        0 6px 22px rgba(139,92,246,0.30);
+      animation: rotate 14s linear infinite;
+      flex-shrink: 0;
+    }
+    .logo-mark::before {
+      content: '';
+      position: absolute; inset: 3px;
+      border-radius: 6px;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,200,154,0.12), transparent 55%),
+        linear-gradient(180deg, rgba(15,13,24,0.94), rgba(8,7,13,0.97));
+    }
+    .logo-mark svg {
+      position: relative; z-index: 1;
+      width: 12px; height: 12px;
+      filter: drop-shadow(0 0 5px rgba(255,200,154,0.4));
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    .logo-text {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--coral), var(--rose), var(--violet));
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
     }
 
-    .logo-icon {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-    }
-
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: .4rem;
-    }
-
-    header .subtitle {
+    .nav-back {
+      font-size: .85rem;
+      font-weight: 500;
       color: var(--muted);
-      font-size: .95rem;
+      text-decoration: none;
+      display: flex; align-items: center; gap: .4rem;
+      transition: color .2s;
     }
+    .nav-back:hover { color: var(--text); }
 
-    /* ── Layout ── */
-    main {
+    /* ── Page layout ── */
+    .page {
+      position: relative; z-index: 1;
       max-width: 760px;
       margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
+      padding: 3rem 1.5rem 6rem;
     }
 
-    /* ── Sections ── */
-    section { margin-bottom: 3rem; }
+    /* ── Hero ── */
+    .hero-block {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
 
-    h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text);
+    .hero-block h1 {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: .75rem;
+    }
+
+    .hero-block h1 em {
+      font-style: italic;
+      background: linear-gradient(110deg, var(--peach), var(--rose) 45%, var(--violet));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-block p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* ── Card (like room-card) ── */
+    .card {
+      position: relative;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(255,138,107,0.08), transparent 45%),
+        radial-gradient(circle at 100% 100%, rgba(139,92,246,0.08), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%),
+        var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
       margin-bottom: 1rem;
-      padding-bottom: .5rem;
-      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--lift-neutral), var(--emboss-rim-soft), var(--emboss-base);
     }
 
-    h2::before {
+    /* gradient border accent */
+    .card::before {
       content: '';
-      display: inline-block;
-      width: 4px; height: 1.1em;
-      background: linear-gradient(180deg, var(--accent), var(--accent2));
-      border-radius: 2px;
-      margin-right: .6rem;
-      vertical-align: middle;
+      position: absolute; inset: 0;
+      border-radius: var(--radius);
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,138,107,0.35), transparent 35%, transparent 65%, rgba(139,92,246,0.35));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+              mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0.5;
     }
 
-    p { color: var(--muted); margin-bottom: 1rem; }
-    p strong { color: var(--text); }
+    /* ── Section headers ── */
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      margin-bottom: 1rem;
+    }
+
+    section { margin-bottom: 2rem; }
+
+    section h2 {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+      margin-bottom: .85rem;
+      background: linear-gradient(135deg, var(--coral) 0%, var(--rose) 50%, var(--violet) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: .95rem;
+      margin-bottom: .85rem;
+    }
+
+    p strong { color: var(--text); font-weight: 600; }
 
     ul {
       list-style: none;
       padding: 0;
-      margin-bottom: 1rem;
+      margin-bottom: .85rem;
     }
 
     ul li {
       color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.6;
       padding: .35rem 0 .35rem 1.4rem;
       position: relative;
     }
@@ -124,146 +298,202 @@
     ul li::before {
       content: '›';
       position: absolute; left: 0;
-      color: var(--accent);
+      background: linear-gradient(135deg, var(--coral), var(--rose));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
       font-weight: 700;
+      font-size: 1.1rem;
+      line-height: 1.5;
     }
 
-    ul li strong { color: var(--text); }
+    ul li strong { color: var(--text); font-weight: 600; }
+
+    a { color: var(--coral); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--peach); }
 
     code {
-      background: var(--code-bg);
-      color: var(--accent2);
-      padding: .15em .45em;
-      border-radius: 4px;
-      font-size: .88em;
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    }
-
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    /* ── Summary card ── */
-    .summary-card {
-      background: var(--surface);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82em;
+      font-weight: 500;
+      background: rgba(0,0,0,0.35);
       border: 1px solid var(--border);
-      border-left: 4px solid var(--accent);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      border-radius: 5px;
+      padding: .15em .45em;
+      color: var(--peach);
     }
 
-    .summary-card p { margin: 0; }
-    .summary-card ul { margin: .75rem 0 0; }
+    /* ── Summary callout card ── */
+    .callout {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,138,107,0.06), rgba(139,92,246,0.04));
+      border: 1px solid rgba(255,138,107,0.18);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--recess);
+    }
+
+    .callout p { margin: 0 0 .75rem; }
+    .callout p:last-child { margin: 0; }
+    .callout ul { margin: .5rem 0 0; }
 
     /* ── Table ── */
     .table-wrap {
-      overflow-x: auto;
-      border-radius: var(--radius);
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      margin-bottom: 1rem;
+      overflow-x: auto;
+      margin-bottom: .85rem;
+      box-shadow: var(--lift-small), var(--emboss-rim-faint), var(--emboss-base-soft);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: .93rem;
+      font-size: .88rem;
     }
 
-    thead tr { background: var(--surface); }
+    thead tr {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    }
 
     thead th {
       text-align: left;
-      padding: .8rem 1.1rem;
-      font-weight: 600;
-      color: var(--text);
+      padding: .75rem 1rem;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted-2);
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
 
     tbody tr { transition: background .15s; }
-    tbody tr:hover { background: rgba(124, 111, 247, .06); }
+    tbody tr:hover { background: rgba(255,138,107,0.04); }
 
     tbody td {
-      padding: .75rem 1.1rem;
+      padding: .7rem 1rem;
       color: var(--muted);
       border-bottom: 1px solid var(--border);
       vertical-align: top;
+      line-height: 1.55;
     }
 
     tbody tr:last-child td { border-bottom: none; }
-    tbody td:first-child { color: var(--text); font-weight: 500; }
+    tbody td:first-child { color: var(--text); font-weight: 500; white-space: nowrap; }
 
-    /* ── Permission pills ── */
+    /* ── Permission items ── */
     .perm-list { display: flex; flex-direction: column; gap: .6rem; }
 
     .perm-item {
       display: flex;
-      gap: 1rem;
-      background: var(--surface);
+      gap: .85rem;
+      align-items: flex-start;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .8rem 1rem;
+      border-radius: var(--radius-sm);
+      padding: .85rem 1rem;
+      box-shadow: var(--lift-small), var(--emboss-rim-faint), var(--emboss-base-soft);
     }
 
     .perm-badge {
       flex-shrink: 0;
-      background: rgba(124, 111, 247, .15);
-      color: var(--accent);
-      border-radius: 6px;
-      padding: .2rem .6rem;
-      font-size: .82rem;
-      font-weight: 600;
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      font-weight: 700;
       white-space: nowrap;
+      padding: .25rem .65rem;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,138,107,0.18), rgba(255,138,107,0.08));
+      border: 1px solid rgba(255,138,107,0.25);
+      color: var(--coral);
       align-self: flex-start;
-      margin-top: .1rem;
+      margin-top: .05rem;
     }
 
-    .perm-item p { margin: 0; font-size: .93rem; }
+    .perm-item p { margin: 0; font-size: .9rem; color: var(--muted); }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex; align-items: center; gap: .85rem;
+      margin: 2.5rem 0;
+      color: var(--muted-2);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
 
     /* ── Footer ── */
     footer {
+      position: relative; z-index: 1;
       text-align: center;
       padding: 2rem 1.5rem;
       border-top: 1px solid var(--border);
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: .95rem;
       color: var(--muted);
-      font-size: .875rem;
     }
 
-    footer a { color: var(--accent); }
+    footer span {
+      background: linear-gradient(110deg, var(--coral), var(--rose), var(--violet));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
 
     @media (max-width: 600px) {
-      header h1 { font-size: 1.5rem; }
-      main { padding: 2rem 1rem 4rem; }
+      nav { padding: 1rem; }
+      .page { padding: 2rem 1rem 4rem; }
+      .perm-item { flex-direction: column; gap: .5rem; }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <a class="logo" href="index.html">
-    <div class="logo-icon">🎬</div>
-    <span>Duet</span>
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="logo-mark">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="3.5" height="10" rx="1" fill="#f4f1ea" opacity="0.9"/>
+        <rect x="8.5" y="2" width="3.5" height="10" rx="1" fill="#f4f1ea" opacity="0.9"/>
+      </svg>
+    </div>
+    <span class="logo-text">Duet</span>
   </a>
-  <h1>Privacy Policy</h1>
-  <p class="subtitle">Last updated: May 11, 2026</p>
-</header>
+  <a class="nav-back" href="index.html">← Home</a>
+</nav>
 
-<main>
+<div class="page">
+
+  <div class="hero-block">
+    <h1>Privacy <em>Policy</em></h1>
+    <p>Last updated: May 11, 2026</p>
+  </div>
+
+  <div class="callout">
+    <p>Duet is a browser extension that synchronizes play, pause, and seek events for two people watching the same video. This document describes exactly what data the extension touches, where it goes, and how long it lives.</p>
+  </div>
 
   <section>
-    <div class="summary-card">
-      <p>Duet is a browser extension that synchronizes play, pause, and seek events for two people watching the same video. This document describes exactly what data the extension touches, where it goes, and how long it lives.</p>
-    </div>
-
     <h2>Short version</h2>
-    <ul>
-      <li>Duet sends a small amount of session data through a developer-managed Firebase Realtime Database <strong>only when you are inside a room</strong>.</li>
-      <li>That data is the minimum needed for sync: the URL and title of the page you're on, the current playback timestamp, your chosen display name, and any reactions or short messages you send to your partner.</li>
-      <li>Rooms auto-expire after <strong>7 days of inactivity</strong>. The database isn't logged, exported, analyzed, or shared with any third party.</li>
-      <li>There are <strong>no analytics SDKs, no advertising SDKs, and no telemetry</strong>.</li>
-    </ul>
+    <div class="card">
+      <ul>
+        <li>Duet sends a small amount of session data through a developer-managed Firebase Realtime Database <strong>only when you are inside a room</strong>.</li>
+        <li>That data is the minimum needed for sync: the URL and title of the page you're on, the current playback timestamp, your chosen display name, and any reactions or short messages you send to your partner.</li>
+        <li>Rooms auto-expire after <strong>7 days of inactivity</strong>. The database isn't logged, exported, analyzed, or shared with any third party.</li>
+        <li>There are <strong>no analytics SDKs, no advertising SDKs, and no telemetry</strong>.</li>
+      </ul>
+    </div>
   </section>
+
+  <div class="divider">What we transmit</div>
 
   <section>
     <h2>What gets transmitted, and when</h2>
@@ -291,11 +521,11 @@
             <td>Drives the actual sync</td>
           </tr>
           <tr>
-            <td>Display name and avatar emoji you choose</td>
+            <td>Display name and avatar emoji</td>
             <td>Labels your actions to your partner ("Alice paused")</td>
           </tr>
           <tr>
-            <td>Reactions and short chat messages you send</td>
+            <td>Reactions and short chat messages</td>
             <td>Delivered to your partner; auto-deleted from the database 6 seconds after they're sent</td>
           </tr>
           <tr>
@@ -308,29 +538,37 @@
     <p>The extension does <strong>not</strong> read or transmit form contents, passwords, autofill data, bookmarks, history from other tabs, or anything from the page outside of the active <code>&lt;video&gt;</code> element and the page's URL/title.</p>
   </section>
 
+  <div class="divider">Storage</div>
+
   <section>
     <h2>Where data is stored</h2>
     <p>All transmitted data is written to a Firebase Realtime Database hosted in Google Cloud (US-Central region) and managed by Duet's developer. Access to the project is restricted to the developer; the database is not publicly browsable.</p>
     <p>Within the database, all data lives under the room code. Lifetimes:</p>
-    <ul>
-      <li><strong>Presence records</strong> — deleted automatically when you close the tab or disconnect, typically within 60 seconds.</li>
-      <li><strong>Reactions and chat messages</strong> — deleted automatically about 6 seconds after they're sent.</li>
-      <li><strong>Room state</strong> — retained while at least one partner is active. A scheduled cleanup job deletes rooms idle for 7 days.</li>
-    </ul>
+    <div class="card">
+      <ul>
+        <li><strong>Presence records</strong> — deleted automatically when you close the tab or disconnect, typically within 60 seconds.</li>
+        <li><strong>Reactions and chat messages</strong> — deleted automatically about 6 seconds after they're sent.</li>
+        <li><strong>Room state</strong> — retained while at least one partner is active. A scheduled cleanup job deletes rooms idle for 7 days, along with any associated presence records.</li>
+      </ul>
+    </div>
     <p>The developer does not analyze, export, or sell the contents of the database. The data is read by Firebase's realtime infrastructure solely to deliver each side's events to the other side.</p>
   </section>
 
   <section>
-    <h2>What the extension stores locally on your computer</h2>
+    <h2>What the extension stores locally</h2>
     <p>Inside your browser's <code>chrome.storage.local</code>:</p>
-    <ul>
-      <li>The display name and avatar emoji you chose</li>
-      <li>The room code and user ID of your current session (so the extension can rejoin after a reload)</li>
-      <li>The position of the floating badge on screen and whether you've minimized it</li>
-      <li>A small diagnostic record of the last few writes (for debugging)</li>
-    </ul>
+    <div class="card">
+      <ul>
+        <li>The display name and avatar emoji you chose</li>
+        <li>The room code and user ID of your current session (so the extension can rejoin after a reload)</li>
+        <li>The position of the floating badge on screen and whether you've minimized it</li>
+        <li>A small diagnostic record of the last few writes (for debugging)</li>
+      </ul>
+    </div>
     <p>These never leave your computer. They are removed when you uninstall the extension.</p>
   </section>
+
+  <div class="divider">Permissions</div>
 
   <section>
     <h2>Permissions, in plain English</h2>
@@ -354,12 +592,16 @@
     </div>
   </section>
 
+  <div class="divider">Third parties & contact</div>
+
   <section>
     <h2>Third parties</h2>
-    <ul>
-      <li><strong>Google Firebase / Google Cloud Platform.</strong> All sync traffic flows through a Firebase Realtime Database hosted on Google's infrastructure. Your usage of Duet is therefore also subject to Google's privacy practices. See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>.</li>
-      <li><strong>No analytics, advertising, error reporting, or telemetry SDKs</strong> are bundled with Duet.</li>
-    </ul>
+    <div class="card">
+      <ul>
+        <li><strong>Google Firebase / Google Cloud Platform.</strong> All sync traffic flows through a Firebase Realtime Database hosted on Google's infrastructure. Your usage of Duet is also subject to Google's privacy practices. See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>.</li>
+        <li><strong>No analytics, advertising, error reporting, or telemetry SDKs</strong> are bundled with Duet.</li>
+      </ul>
+    </div>
   </section>
 
   <section>
@@ -377,10 +619,11 @@
     <p>For questions about this policy, open an issue on the <a href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">Duet GitHub repository</a>.</p>
   </section>
 
-</main>
+</div>
 
 <footer>
-  <p>&copy; 2026 Duet &nbsp;&middot;&nbsp; <a href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">GitHub</a></p>
+  <span>watch together</span> &nbsp;·&nbsp; © 2026 Duet &nbsp;·&nbsp;
+  <a href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
 </body>
