@@ -1,0 +1,16 @@
+.DS_Store
+*.DS_Store
+node_modules/
+.env
+*.log
+
+# Build artifacts / ZIPs
+*.zip
+
+# h5i binary & workspace files
+h5i.exe
+h5i_bin/
+.h5i/
+
+# Dev-only folders
+free-claude-code/

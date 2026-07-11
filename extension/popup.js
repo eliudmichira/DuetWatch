@@ -267,6 +267,32 @@ function partnerFreshness() {
   return { state: "gone", ageSec };
 }
 
+function renderPartnerAvatar() {
+  const el = $("partner-avatar");
+  if (!el) return;
+  const value = partnerMeta?.emoji;
+  if (value && isAvatarCode(value)) {
+    el.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = avatarUrl(value);
+    img.alt = "";
+    img.draggable = false;
+    el.appendChild(img);
+    el.classList.add("visible");
+  } else if (value && typeof value === "string" && value.length > 0 && value.length <= 4) {
+    el.innerHTML = "";
+    el.textContent = value;
+    el.classList.add("visible");
+    el.style.display = "inline-flex";
+    el.style.alignItems = "center";
+    el.style.justifyContent = "center";
+    el.style.fontSize = "11px";
+  } else {
+    el.innerHTML = "";
+    el.classList.remove("visible");
+  }
+}
+
 function renderPartnerCard() {
   const card = $("partner-card");
   const peerHere = $("control-row").style.display === "flex"; // proxy for peerCount >= 2
@@ -282,10 +308,11 @@ function renderPartnerCard() {
   card.classList.toggle("pending", !isLive);
 
   if (!isLive) {
-    const labelEl = $("partner-label");
+    const labelEl = $("partner-label-text");
     const partnerName = (partnerMeta && typeof partnerMeta.name === "string" && partnerMeta.name.trim())
       ? partnerMeta.name.trim() : "";
     if (labelEl) labelEl.textContent = partnerName ? `${partnerName} is watching` : "Partner is watching";
+    renderPartnerAvatar();
 
     // If we have a last-known snapshot AND they were paused, show *that*
     // instead of the generic waiting message — staleness while paused is
@@ -319,11 +346,12 @@ function renderPartnerCard() {
     : hostText;
   $("partner-title").textContent = partnerMeta.videoTitle || partnerMeta.pageTitle || "Untitled video";
   // Personalize the label if the partner has set a name.
-  const labelEl = $("partner-label");
+  const labelEl = $("partner-label-text");
   if (labelEl) {
     const name = (typeof partnerMeta.name === "string" && partnerMeta.name.trim()) ? partnerMeta.name.trim() : "";
     labelEl.textContent = name ? `${name} is watching` : "Partner is watching";
   }
+  renderPartnerAvatar();
   refreshSyncMeBtnLabel();
 
   const cur = partnerMeta.currentTime || 0;
@@ -537,8 +565,8 @@ const EMOJI_PACKS = {
 // ── Illustrated avatars (Disney+/Peacock style) ────────────
 // Stored as compact codes "av:00".."av:23" so they fit inside the 16-char
 // `meta.emoji` Firebase rule without rule changes. The popup translates
-// the code into a DiceBear lorelei SVG URL for display.
-const AVATAR_BASE = "https://api.dicebear.com/9.x/lorelei/svg?seed=";
+// the code into a DiceBear adventurer SVG URL for display.
+const AVATAR_BASE = "https://api.dicebear.com/9.x/adventurer/svg?seed=";
 const AVATAR_SEEDS = [
   "Mochi", "Pepper", "Suki", "Felix", "Luna", "Nico",
   "Sasha", "Kira", "Theo", "Ivy", "Rio", "Juno",
@@ -617,7 +645,14 @@ function openEmojiPicker(mode) {
   const reset = $("emoji-reset-chip");
   if (reset) reset.style.display = mode === "avatar" ? "" : "none";
   // If recents exist, default to that pack; otherwise first real pack
-  currentEmojiPack = recentEmojis.length ? "Recent" : Object.keys(EMOJI_PACKS)[0];
+  const hasRelevantRecents = mode === "avatar"
+    ? recentEmojis.some(isAvatarCode)
+    : recentEmojis.length > 0;
+  if (hasRelevantRecents) {
+    currentEmojiPack = "Recent";
+  } else {
+    currentEmojiPack = mode === "avatar" ? "Avatars" : Object.keys(EMOJI_PACKS)[0];
+  }
   $("emoji-drawer").classList.add("active");
   $("emoji-backdrop")?.classList.add("active");
   renderEmojiCategories();
@@ -639,11 +674,13 @@ function renderEmojiCategories() {
   // Reaction mode: emoji packs + Recent (if any).
   let cats = [];
   if (pickerMode === "avatar") {
-    cats = ["Avatars"];
+    if (recentEmojis.some(isAvatarCode)) cats.push("Recent");
+    cats.push("Avatars");
   } else {
     if (recentEmojis.length) cats.push("Recent");
     cats.push(...Object.keys(EMOJI_PACKS));
   }
+  if (!cats.includes(currentEmojiPack)) currentEmojiPack = cats[0];
   cats.forEach(cat => {
     const btn = document.createElement("button");
     btn.className = `emoji-cat-btn ${cat === currentEmojiPack ? "active" : ""}`;
@@ -666,9 +703,11 @@ function renderEmojiGrid() {
 
   let list;
   if (pickerMode === "avatar") {
-    // Avatar drawer always shows the full illustrated set — search is a no-op
-    // here since the visuals are the only signal users can scan by.
-    list = AVATAR_CODES;
+    if (currentEmojiPack === "Recent") {
+      list = recentEmojis.filter(isAvatarCode);
+    } else {
+      list = AVATAR_CODES;
+    }
   } else if (searchQuery) {
     list = allEmojis();
   } else if (currentEmojiPack === "Recent") {
@@ -703,8 +742,8 @@ function renderEmojiGrid() {
         setAvatar(value);
       } else {
         sendReactionLocalAndRemote(value);
-        pushRecent(value);
       }
+      pushRecent(value);
       closeEmojiPicker();
     };
     host.appendChild(btn);

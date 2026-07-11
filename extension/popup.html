@@ -4,10 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Duet — watch together</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Respect users with vestibular sensitivity. Disables atmospheric drift,
+       logo conic spin, pulse glows, and all transitions — but keeps colors,
+       gradients, and layout intact. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Keyboard navigation — a thin violet ring on focus for any focusable
+       element. Uses :focus-visible so mouse clicks don't trigger it.
+       Matches the existing avatar-selected state (rgba(139,92,246,…)). */
+    :focus { outline: none; }
+    :focus-visible {
+      outline: 2px solid rgba(139, 92, 246, 0.55);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
 
     :root {
       --bg-0:    #08070d;
@@ -616,13 +639,24 @@
       box-shadow: var(--recess);
     }
     .partner-head {
-      display: flex; align-items: baseline; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       gap: 8px; margin-bottom: 4px;
     }
     .partner-label {
       font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--muted-2);
+      display: inline-flex; align-items: center; gap: 5px;
     }
+    .partner-avatar {
+      width: 16px; height: 16px; border-radius: 50%;
+      overflow: hidden; flex-shrink: 0;
+      border: 1px solid var(--border);
+      display: none;
+    }
+    .partner-avatar img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .partner-avatar.visible { display: inline-block; }
     .partner-host {
       font-size: 10px; font-weight: 600; color: var(--muted);
       font-family: 'JetBrains Mono', monospace;
@@ -1177,7 +1211,6 @@
       border-radius: 50%;
       overflow: hidden;
       font-size: 20px;
-      display: grid;
       place-items: center;
       /* Ensure emojis/portraits are centered inside the ring */
       transform: scale(0.85); 
@@ -1275,7 +1308,7 @@
         <!-- Partner now-playing card -->
         <div class="partner-card" id="partner-card" style="display:none">
           <div class="partner-head">
-            <div class="partner-label" id="partner-label">Partner is watching</div>
+            <div class="partner-label" id="partner-label"><span class="partner-avatar" id="partner-avatar"></span><span id="partner-label-text">Partner is watching</span></div>
             <div class="partner-host" id="partner-host">—</div>
           </div>
           <div class="partner-title" id="partner-title">—</div>
@@ -1294,34 +1327,19 @@
 
         <!-- Sync + reactions -->
         <div class="control-row" id="control-row" style="display:none">
-          <button class="btn-icon sync-btn" id="sync-me-btn" title="Snap partner to my exact timestamp">
+          <button class="btn-icon sync-btn" id="sync-me-btn" title="Snap partner to my exact timestamp" aria-label="Sync partner to my current timestamp">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path d="M2 8a6 6 0 0 1 10.5-3.97V3a.75.75 0 0 1 1.5 0v3.25a.75.75 0 0 1-.75.75H10a.75.75 0 0 1 0-1.5h1.74A4.5 4.5 0 0 0 3.5 8a.75.75 0 0 1-1.5 0Zm12 0a.75.75 0 0 1 1.5 0 6 6 0 0 1-10.5 3.97V13a.75.75 0 0 1-1.5 0V9.75A.75.75 0 0 1 4.25 9H7.5a.75.75 0 0 1 0 1.5H5.76A4.5 4.5 0 0 0 14 8Z" fill="currentColor"/>
             </svg>
             <span>Sync partner to me</span>
           </button>
           <div class="reactions" id="reactions-tray">
-            <button data-emoji="❤️">❤️</button>
-            <button data-emoji="😂">😂</button>
-            <button data-emoji="😮">😮</button>
-            <button data-emoji="🔥">🔥</button>
-            <button id="open-emoji-picker-btn" title="More emojis">+</button>
+            <button data-emoji="❤️" aria-label="Send heart reaction">❤️</button>
+            <button data-emoji="😂" aria-label="Send laughing reaction">😂</button>
+            <button data-emoji="😮" aria-label="Send surprised reaction">😮</button>
+            <button data-emoji="🔥" aria-label="Send fire reaction">🔥</button>
+            <button id="open-emoji-picker-btn" title="More emojis" aria-label="Open full emoji picker">+</button>
           </div>
-        </div>
-
-        <!-- Emoji Picker Drawer + dismiss backdrop -->
-        <div class="emoji-backdrop" id="emoji-backdrop"></div>
-        <div class="emoji-drawer" id="emoji-drawer">
-          <div class="emoji-drawer-header">
-            <span class="emoji-drawer-title" id="emoji-drawer-title">Pick your vibe</span>
-            <button class="emoji-drawer-close" id="emoji-drawer-close" aria-label="Close">×</button>
-          </div>
-          <div class="emoji-search-row">
-            <input type="text" id="emoji-search" class="emoji-search" placeholder="Search emoji…" autocomplete="off" spellcheck="false" />
-            <button class="emoji-reset-chip" id="emoji-reset-chip" title="Reset to default 👋">Reset</button>
-          </div>
-          <div class="emoji-categories" id="emoji-categories"></div>
-          <div class="emoji-grid" id="emoji-grid"></div>
         </div>
 
         <div class="chat-bar" id="chat-bar" style="display:none; margin-top: 12px; position: relative;">
@@ -1351,6 +1369,21 @@
         </details>
       </div>
 
+      <!-- Emoji Picker Drawer + dismiss backdrop -->
+      <div class="emoji-backdrop" id="emoji-backdrop"></div>
+      <div class="emoji-drawer" id="emoji-drawer">
+        <div class="emoji-drawer-header">
+          <span class="emoji-drawer-title" id="emoji-drawer-title">Pick your vibe</span>
+          <button class="emoji-drawer-close" id="emoji-drawer-close" aria-label="Close">×</button>
+        </div>
+        <div class="emoji-search-row">
+          <input type="text" id="emoji-search" class="emoji-search" placeholder="Search emoji…" autocomplete="off" spellcheck="false" />
+          <button class="emoji-reset-chip" id="emoji-reset-chip" title="Reset to default 👋">Reset</button>
+        </div>
+        <div class="emoji-categories" id="emoji-categories"></div>
+        <div class="emoji-grid" id="emoji-grid"></div>
+      </div>
+
       <!-- Disconnected View -->
       <div id="view-disconnected">
         <div class="hero">
@@ -1364,7 +1397,7 @@
 
         <div class="input-wrap" style="margin-bottom: 14px; display: flex; gap: 10px; align-items: center;">
           <div class="avatar-wrap">
-            <button class="avatar-btn" id="avatar-picker-btn">👋</button>
+            <button class="avatar-btn" id="avatar-picker-btn" aria-label="Choose your avatar emoji">👋</button>
           </div>
           <input type="text" class="code-input" id="name-input" maxlength="32" placeholder="Your name (optional)" autocomplete="off" spellcheck="false" style="text-transform: none; letter-spacing: 0; font-family: inherit; flex: 1;" />
         </div>
@@ -1379,6 +1412,10 @@
         <button class="btn btn-secondary" id="join-btn">Join room</button>
 
         <div class="msg" id="main-msg"></div>
+
+        <div style="margin-top: 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 10.5px; line-height: 1.5; color: var(--muted-2); text-align: center;">
+          Sync runs on a hosted backend. Rooms auto-expire after inactivity.
+        </div>
       </div>
 
       <div class="footer">made for the <span>two of you</span></div>

@@ -6,6 +6,10 @@
   if (window.__duetInjected) return;
   window.__duetInjected = true;
 
+  // Flip to true while developing if you need the verbose trace.
+  const DEBUG = false;
+  const dlog = (...args) => { if (DEBUG) console.log(...args); };
+
   let video = null;
   let isApplyingRemote = false;
   let expectedRemoteEvents = new Set();
@@ -17,15 +21,25 @@
   let lastSentAt = 0;
   let lastTabInfoAt = 0;
   let tabInfoTimer = null;
-  let adInProgress = false;   // suppress sync while we're watching/skipping an ad
   let contextInvalid = false; // set true once the extension is reloaded/uninstalled
   let partnerName = "";       // last known display name of the partner (from SYNC_STATUS)
   let partnerEmoji = "";      // last known avatar emoji of the partner
+  let myEmoji = "";           // my own avatar (cached from storage for self chat bubbles)
+
+  // Load own avatar from storage so self-sent chat bubbles include our portrait.
+  try {
+    chrome.storage.local.get(["myEmoji"], (data) => {
+      if (typeof data?.myEmoji === "string") myEmoji = data.myEmoji;
+    });
+    chrome.storage.onChanged.addListener((changes) => {
+      if (changes.myEmoji) myEmoji = changes.myEmoji.newValue || "";
+    });
+  } catch {}
 
   // Avatar codes (mirror of popup.js's mapping). Stored as compact "av:NN"
   // codes; we resolve them to DiceBear illustrated portraits on demand.
   // Kept in sync with popup.js — if seeds/gradients change there, mirror here.
-  const __DUET_AVATAR_BASE = "https://api.dicebear.com/9.x/lorelei/svg?seed=";
+  const __DUET_AVATAR_BASE = "https://api.dicebear.com/9.x/adventurer/svg?seed=";
   const __DUET_AVATAR_SEEDS = [
     "Mochi","Pepper","Suki","Felix","Luna","Nico","Sasha","Kira","Theo","Ivy","Rio","Juno",
     "Zara","Atlas","Wren","Hugo","Mila","Bo","Indigo","Soren","Nova","Cleo","Otis","Vesper"
@@ -144,16 +158,11 @@
 
   function teardown() {
     try { observer?.disconnect(); } catch {}
-    if (tabInfoTimer)   { clearInterval(tabInfoTimer);   tabInfoTimer   = null; }
-    if (ytAdTimer)      { clearInterval(ytAdTimer);      ytAdTimer      = null; }
-    if (yflixSkipTimer) { clearInterval(yflixSkipTimer); yflixSkipTimer = null; }
+    if (tabInfoTimer) { clearInterval(tabInfoTimer); tabInfoTimer = null; }
     // Hide the badge — extension is gone, anything it claims is stale
     const badge = document.getElementById("__duet_badge");
     if (badge) badge.style.opacity = "0";
   }
-
-  let ytAdTimer = null;
-  let yflixSkipTimer = null;
 
   // ── Video Detection ────────────────────────────────────────
   function scoreVideo(v) {
@@ -202,7 +211,7 @@
     }));
     v.addEventListener("playing",    guard(() => { if (consumeRemoteEvent("playing")) return; sendSync("play");  sendTabInfo(true); }));
     v.addEventListener("timeupdate", guard(() => { sendTabInfo(); }));
-    console.log("[Duet] Attached to active video player.");
+    dlog("[Duet] Attached to active video player.");
     updateOverlay();
     sendTabInfo(true); // immediately push our metadata
   }
@@ -220,7 +229,6 @@
   // ── Send local action ──────────────────────────────────────
   function sendSync(action) {
     if (isApplyingRemote || !connected || !video) return;
-    if (adInProgress) return; // don't push ad-video timestamps to partner
     const sig = `${action}|${video.currentTime.toFixed(2)}`;
     const now = Date.now();
     if (sig === lastSentSig && now - lastSentAt < 250) return;
@@ -672,7 +680,7 @@
         box-shadow: 0 10px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04) inset;
         transition: opacity 0.35s, transform 0.35s;
         opacity: 0; transform: translateY(6px);
-        display: flex; flex-direction: column; overflow: hidden; pointer-events: auto;
+        display: flex; flex-direction: column; pointer-events: auto;
       `;
       
       const topBar = document.createElement("div");
@@ -690,13 +698,13 @@
       
       controls.innerHTML = `
         <div style="height: 1px; background: rgba(255,255,255,0.1); width: 100%; margin-bottom: 2px;"></div>
-        <button id="__pp_sync_btn" style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 6px; padding: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 11px;">${syncBtnDefaultLabel()}</button>
+        <button id="__pp_sync_btn" aria-label="Sync partner to my current timestamp" style="background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 6px; padding: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 11px;">${syncBtnDefaultLabel()}</button>
         <div style="display: flex; gap: 6px; align-items: center;">
-          ${['😂', '💖', '🔥', '😭'].map(e => `<button class="__pp_re_btn" data-emoji="${e}" style="background: rgba(255,255,255,0.05); border: none; border-radius: 6px; cursor: pointer; font-size: 15px; padding: 4px 6px; transition: background 0.2s; flex: 1;">${e}</button>`).join('')}
-          <button id="__pp_more_emojis" title="More emojis" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 8px; color: rgba(244,241,234,0.7); flex-shrink: 0;">+</button>
+          ${['😂', '💖', '🔥', '😭'].map(e => `<button class="__pp_re_btn" data-emoji="${e}" aria-label="Send ${e} reaction" style="background: rgba(255,255,255,0.05); border: none; border-radius: 6px; cursor: pointer; font-size: 15px; padding: 4px 6px; transition: background 0.2s; flex: 1;">${e}</button>`).join('')}
+          <button id="__pp_more_emojis" title="More emojis" aria-label="Open full emoji picker" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 8px; color: rgba(244,241,234,0.7); flex-shrink: 0;">+</button>
         </div>
         <div style="position: relative;">
-          <input id="__pp_chat_input" type="text" placeholder="Send a message…" maxlength="140" autocomplete="off" spellcheck="false" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 26px 6px 8px; color: #f4f1ea; font-family: inherit; font-size: 11px; outline: none; transition: border-color 0.2s;" />
+          <input id="__pp_chat_input" type="text" aria-label="Type a message to send to your partner" placeholder="Send a message…" maxlength="140" autocomplete="off" spellcheck="false" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 26px 6px 8px; color: #f4f1ea; font-family: inherit; font-size: 11px; outline: none; transition: border-color 0.2s;" />
           <span id="__pp_chat_hint" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 9px; color: rgba(244,241,234,0.4); pointer-events: none;">↵</span>
         </div>
       `;
@@ -1259,10 +1267,8 @@
       display: inline-flex; align-items: center; gap: 5px;
     `;
     // Tiny avatar inline with the sender label so attribution survives even
-    // on bright frames where color contrast washes out. We don't have our own
-    // avatar value here (lives in background only), so self bubbles fall back
-    // to a neutral dot.
-    const avatarVal = fromSelf ? "" : partnerEmoji;
+    // on bright frames where color contrast washes out.
+    const avatarVal = fromSelf ? myEmoji : partnerEmoji;
     senderEl.innerHTML = `${avatarHtml(avatarVal, 14) || ""}<span>${who}</span>`;
 
     const textEl = document.createElement("span");
@@ -1312,6 +1318,38 @@
       }
       /* Hide scrollbar for emoji picker */
       #__pp_controls > div:nth-child(3)::-webkit-scrollbar { display: none; }
+
+      /* ── Reduced-motion ─────────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        /* Floating emoji: skip travel, just fade in/out in place */
+        @keyframes __pp_float {
+          0%   { opacity: 0; transform: none; }
+          15%  { opacity: 1; transform: none; }
+          85%  { opacity: 1; transform: none; }
+          100% { opacity: 0; transform: none; }
+        }
+        /* Chat slides: cross-fade instead of scrolling */
+        @keyframes __pp_slide_rtl {
+          0%   { opacity: 0; transform: none; }
+          8%   { opacity: 1; transform: none; }
+          92%  { opacity: 1; transform: none; }
+          100% { opacity: 0; transform: none; }
+        }
+        @keyframes __pp_slide_ltr {
+          0%   { opacity: 0; transform: none; }
+          8%   { opacity: 1; transform: none; }
+          92%  { opacity: 1; transform: none; }
+          100% { opacity: 0; transform: none; }
+        }
+        /* Badge & flash entrance / exit: near-instant */
+        #__duet_badge,
+        #__duet_flash,
+        #__pp_presence_toast,
+        #__pp_system_pill {
+          transition-duration: 0.05s !important;
+          animation-duration: 0.05s !important;
+        }
+      }
     `;
     (document.head || document.documentElement).appendChild(s);
   })();
@@ -1403,108 +1441,6 @@
       return true;
     }
   });
-
-  // ── Ad skipping (YouTube + yflix.to) ───────────────────────
-  const host = location.hostname.replace(/^www\./, "");
-  const isYouTube = /(^|\.)youtube\.com$/.test(host);
-  const isYflix   = /(^|\.)yflix\.to$/.test(host);
-
-  function showAdSkipFlash(label) {
-    showFlash("play", label);
-    // Override the icon to a "skip" glyph
-    const flash = document.getElementById("__duet_flash");
-    if (!flash) return;
-    const icon = flash.querySelector("span");
-    if (icon) icon.innerHTML =
-      '<svg width="12" height="12" viewBox="0 0 12 12" fill="none">' +
-      '<path d="M2 1.5v9l6-4.5L2 1.5zM9 1.5h1.5v9H9z" fill="currentColor"/></svg>';
-  }
-
-  if (isYouTube) {
-    let wasAd = false;
-    ytAdTimer = setInterval(() => {
-      if (!extAlive()) return;
-      const player = document.querySelector(".html5-video-player");
-      if (!player) return;
-      const isAd = player.classList.contains("ad-showing") ||
-                   player.classList.contains("ad-interrupting");
-      adInProgress = isAd;
-
-      if (isAd) {
-        // Click the skip button if it's mounted
-        const skip = player.querySelector(
-          ".ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button"
-        );
-        if (skip) { try { skip.click(); } catch {} }
-
-        // For unskippable ads: fast-forward the ad video to its end
-        const ads = player.querySelectorAll("video");
-        for (const v of ads) {
-          if (isFinite(v.duration) && v.duration > 0 && v.currentTime < v.duration - 0.3) {
-            try { v.currentTime = v.duration; } catch {}
-          }
-        }
-
-        if (!wasAd) showAdSkipFlash("Skipped YouTube ad");
-        wasAd = true;
-      } else if (wasAd) {
-        wasAd = false;
-      }
-    }, 400);
-  }
-
-  if (isYflix) {
-    // 1. Popup-on-click ad blocking is now handled by yflix-main.js running in the MAIN world
-
-    // 2. Hide common ad/banner DOM nodes
-    const AD_SELECTORS = [
-      'iframe[src*="ads"]', 'iframe[src*="ad."]', 'iframe[src*="exoclick"]',
-      'iframe[src*="trafficjunky"]', 'iframe[src*="propeller"]', 'iframe[src*="popcash"]',
-      'iframe[src*="adsterra"]', 'iframe[src*="hilltopads"]', 'iframe[src*="adnxs"]',
-      'iframe[src*="doubleclick"]', 'iframe[src*="googlesyndication"]',
-      '[id*="banner"]', '[id*="adslot"]', '[class*="banner-ad"]',
-      '.ads', '.advertisement', '#ads', '.ad-container',
-      'div[id^="ad_"]', 'div[class^="ad_"]', 'div[class*=" ad-"]'
-    ];
-
-    const HIDE_RULE = `${AD_SELECTORS.join(",")} { display:none !important; visibility:hidden !important; opacity:0 !important; pointer-events:none !important; height:0 !important; width:0 !important; }`;
-
-    const styleEl = document.createElement("style");
-    styleEl.id = "__duet_adhide";
-    styleEl.textContent = HIDE_RULE;
-    (document.head || document.documentElement).appendChild(styleEl);
-
-    // 3. Intercept clicks on links that look like trackers/popunders
-    document.addEventListener("click", (e) => {
-      const a = e.target.closest("a");
-      if (!a) return;
-      const href = a.href || "";
-      const looksBad =
-        a.target === "_blank" &&
-        /(?:^|[\/.])(pop|ads?|click|redirect|track|out|go)\b/i.test(new URL(href, location.href).hostname + new URL(href, location.href).pathname);
-      // Also block javascript: links that often trigger window.open
-      if (looksBad || /^javascript:/i.test(href)) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-      }
-    }, true);
-
-    // 4. Periodically try the skip button used by JW/Plyr-style players
-    yflixSkipTimer = setInterval(() => {
-      if (!extAlive()) return;
-      const skip = document.querySelector(
-        '.jw-skip, .jw-button-skip, .skip-ad, [class*="skip-ad" i], [aria-label*="skip" i]'
-      );
-      if (skip && skip.offsetParent !== null) {
-        const now = Date.now();
-        if (now - (skip.__pp_last_click || 0) < 3000) return;
-        skip.__pp_last_click = now;
-        try { skip.click(); } catch {}
-      }
-    }, 600);
-
-    console.log("[Duet] yflix.to ad guard active.");
-  }
 
   // ── Initial status fetch ───────────────────────────────────
   safeSend({ type: "GET_STATUS" }).then((status) => {

@@ -2,12 +2,21 @@
 //  Duet — Background Service Worker
 // ============================================================
 
+// Production builds keep warnings/errors but silence chatty logs. Flip to
+// true while developing if you need the verbose trace.
+const DEBUG = false;
+const dlog = (...args) => { if (DEBUG) console.log(...args); };
+
 importScripts(
   "vendor/firebase-app-compat.js",
   "vendor/firebase-database-compat.js"
 );
 
-// ── Hardcoded Firebase Config ───────────────────────────────
+// ── Firebase Config ─────────────────────────────────────────
+// Hosted-only for v1. Every install talks to the same developer-managed
+// Firebase Realtime Database. Per-room write throttling and TTL cleanup
+// live in the RTDB rules and a scheduled Cloud Function. The API key is
+// restricted to chrome-extension://<this-id>/* via Cloud Console.
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAMT9lZ_CJqMewsosu6yKJ6UcR8nTGSPeA",
   authDomain:        "pausepal-a4d71.firebaseapp.com",
@@ -126,7 +135,7 @@ async function createRoom() {
   try {
     await withTimeout(initFirebase(), 10000, "Connecting to Firebase");
   } catch (err) {
-    return { error: "Can't reach Firebase. Check your internet, disable ad-blockers for this extension, or try again." };
+    return { error: "Can't reach Duet's sync server. Check your internet or disable ad-blockers for this extension." };
   }
 
   const roomCode = generateRoomCode();
@@ -167,7 +176,7 @@ async function joinRoom(roomCode) {
   try {
     await withTimeout(doBootstrap(), 10000, "Connecting to Firebase");
   } catch (err) {
-    return { error: "Can't reach Firebase. Check your internet, disable ad-blockers for this extension, or try again." };
+    return { error: "Can't reach Duet's sync server. Check your internet or disable ad-blockers for this extension." };
   }
   roomCode = roomCode.toUpperCase().trim();
   if (!/^[A-Z2-9]{6}$/.test(roomCode)) {
@@ -382,6 +391,9 @@ async function pushSyncEvent(state, opts = {}) {
   if (opts.force) payload.force = true;
   try {
     await roomRef.child("state").set(payload);
+    // Stamp room-level activity so the scheduled cleanup function can age out
+    // truly idle rooms (best-effort; failure is harmless).
+    roomRef.child("lastTouch").set(firebase.database.ServerValue.TIMESTAMP).catch(() => {});
     recordOk("pushSyncEvent");
     return { ok: true };
   } catch (err) {
@@ -391,6 +403,7 @@ async function pushSyncEvent(state, opts = {}) {
       delete payload.force;
       try {
         await roomRef.child("state").set(payload);
+        roomRef.child("lastTouch").set(firebase.database.ServerValue.TIMESTAMP).catch(() => {});
         recordOk("pushSyncEvent");
         // Surface the rule-mismatch as a one-time hint, not an error
         const hint = "Your Firebase rules don't allow `force`. Sync still works (via drift threshold), but add the `force` rule from the README for instant snaps.";
@@ -888,14 +901,18 @@ function doBootstrap() {
 }
 
 async function bootstrapInner() {
-  await initFirebase();
-
   // Load display name and emoji early so any subsequent meta write includes it.
   try {
     const n = await chrome.storage.local.get(["myName", "myEmoji"]);
     if (typeof n.myName === "string") myName = n.myName.slice(0, 32);
     if (typeof n.myEmoji === "string") myEmoji = n.myEmoji;
   } catch {}
+
+  try {
+    await initFirebase();
+  } catch {
+    return;
+  }
 
   const stored = await chrome.storage.local.get(["currentRoom", "myUserId"]);
   if (!stored.currentRoom) return;
@@ -914,7 +931,7 @@ async function bootstrapInner() {
   metaRef.onDisconnect().remove();
   attachListeners(currentRoom);
   validateRules().catch(() => {});
-  console.log(`[Duet] Restored session: room ${currentRoom}`);
+  dlog(`[Duet] Restored session: room ${currentRoom}`);
 }
 
 chrome.runtime.onStartup.addListener(doBootstrap);
