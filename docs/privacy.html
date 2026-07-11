@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duet — Privacy Policy</title>
+  <meta name="description" content="Privacy policy for the Duet browser extension — watch videos in sync with a partner." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --border:   #2a2d3a;
+      --accent:   #7c6ff7;
+      --accent2:  #5eead4;
+      --text:     #e2e8f0;
+      --muted:    #94a3b8;
+      --code-bg:  #1e2130;
+      --radius:   12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #12141f 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      margin-bottom: 1rem;
+    }
+
+    .logo span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+
+    header .subtitle {
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    /* ── Sections ── */
+    section { margin-bottom: 3rem; }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px; height: 1.1em;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      margin-right: .6rem;
+      vertical-align: middle;
+    }
+
+    p { color: var(--muted); margin-bottom: 1rem; }
+    p strong { color: var(--text); }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    ul li {
+      color: var(--muted);
+      padding: .35rem 0 .35rem 1.4rem;
+      position: relative;
+    }
+
+    ul li::before {
+      content: '›';
+      position: absolute; left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    ul li strong { color: var(--text); }
+
+    code {
+      background: var(--code-bg);
+      color: var(--accent2);
+      padding: .15em .45em;
+      border-radius: 4px;
+      font-size: .88em;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Summary card ── */
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-card p { margin: 0; }
+    .summary-card ul { margin: .75rem 0 0; }
+
+    /* ── Table ── */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .93rem;
+    }
+
+    thead tr { background: var(--surface); }
+
+    thead th {
+      text-align: left;
+      padding: .8rem 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: rgba(124, 111, 247, .06); }
+
+    tbody td {
+      padding: .75rem 1.1rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody td:first-child { color: var(--text); font-weight: 500; }
+
+    /* ── Permission pills ── */
+    .perm-list { display: flex; flex-direction: column; gap: .6rem; }
+
+    .perm-item {
+      display: flex;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .8rem 1rem;
+    }
+
+    .perm-badge {
+      flex-shrink: 0;
+      background: rgba(124, 111, 247, .15);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: .2rem .6rem;
+      font-size: .82rem;
+      font-weight: 600;
+      font-family: monospace;
+      white-space: nowrap;
+      align-self: flex-start;
+      margin-top: .1rem;
+    }
+
+    .perm-item p { margin: 0; font-size: .93rem; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .875rem;
+    }
+
+    footer a { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.5rem; }
+      main { padding: 2rem 1rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">
+    <div class="logo-icon">🎬</div>
+    <span>Duet</span>
+  </a>
+  <h1>Privacy Policy</h1>
+  <p class="subtitle">Last updated: May 11, 2026</p>
+</header>
+
+<main>
+
+  <section>
+    <div class="summary-card">
+      <p>Duet is a browser extension that synchronizes play, pause, and seek events for two people watching the same video. This document describes exactly what data the extension touches, where it goes, and how long it lives.</p>
+    </div>
+
+    <h2>Short version</h2>
+    <ul>
+      <li>Duet sends a small amount of session data through a developer-managed Firebase Realtime Database <strong>only when you are inside a room</strong>.</li>
+      <li>That data is the minimum needed for sync: the URL and title of the page you're on, the current playback timestamp, your chosen display name, and any reactions or short messages you send to your partner.</li>
+      <li>Rooms auto-expire after <strong>7 days of inactivity</strong>. The database isn't logged, exported, analyzed, or shared with any third party.</li>
+      <li>There are <strong>no analytics SDKs, no advertising SDKs, and no telemetry</strong>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What gets transmitted, and when</h2>
+    <p>The extension transmits <strong>nothing</strong> until you click <strong>Create a room</strong> or <strong>Join room</strong> in the popup. After that, while you remain in a room:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Data</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>6-character room code</td>
+            <td>Identifies the room you and your partner share</td>
+          </tr>
+          <tr>
+            <td>URL of the page with the active video</td>
+            <td>So both sides can detect they're on the same page and so the popup can show what your partner is watching</td>
+          </tr>
+          <tr>
+            <td>Hostname and page title</td>
+            <td>Shown in the partner card</td>
+          </tr>
+          <tr>
+            <td><code>currentTime</code>, <code>duration</code>, <code>paused</code>, <code>playbackRate</code></td>
+            <td>Drives the actual sync</td>
+          </tr>
+          <tr>
+            <td>Display name and avatar emoji you choose</td>
+            <td>Labels your actions to your partner ("Alice paused")</td>
+          </tr>
+          <tr>
+            <td>Reactions and short chat messages you send</td>
+            <td>Delivered to your partner; auto-deleted from the database 6 seconds after they're sent</td>
+          </tr>
+          <tr>
+            <td>Randomly generated session user ID</td>
+            <td>Lets us tell your events apart from your partner's</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The extension does <strong>not</strong> read or transmit form contents, passwords, autofill data, bookmarks, history from other tabs, or anything from the page outside of the active <code>&lt;video&gt;</code> element and the page's URL/title.</p>
+  </section>
+
+  <section>
+    <h2>Where data is stored</h2>
+    <p>All transmitted data is written to a Firebase Realtime Database hosted in Google Cloud (US-Central region) and managed by Duet's developer. Access to the project is restricted to the developer; the database is not publicly browsable.</p>
+    <p>Within the database, all data lives under the room code. Lifetimes:</p>
+    <ul>
+      <li><strong>Presence records</strong> — deleted automatically when you close the tab or disconnect, typically within 60 seconds.</li>
+      <li><strong>Reactions and chat messages</strong> — deleted automatically about 6 seconds after they're sent.</li>
+      <li><strong>Room state</strong> — retained while at least one partner is active. A scheduled cleanup job deletes rooms idle for 7 days.</li>
+    </ul>
+    <p>The developer does not analyze, export, or sell the contents of the database. The data is read by Firebase's realtime infrastructure solely to deliver each side's events to the other side.</p>
+  </section>
+
+  <section>
+    <h2>What the extension stores locally on your computer</h2>
+    <p>Inside your browser's <code>chrome.storage.local</code>:</p>
+    <ul>
+      <li>The display name and avatar emoji you chose</li>
+      <li>The room code and user ID of your current session (so the extension can rejoin after a reload)</li>
+      <li>The position of the floating badge on screen and whether you've minimized it</li>
+      <li>A small diagnostic record of the last few writes (for debugging)</li>
+    </ul>
+    <p>These never leave your computer. They are removed when you uninstall the extension.</p>
+  </section>
+
+  <section>
+    <h2>Permissions, in plain English</h2>
+    <div class="perm-list">
+      <div class="perm-item">
+        <span class="perm-badge">storage</span>
+        <p>Saves your display name and current room locally so you don't have to retype them.</p>
+      </div>
+      <div class="perm-item">
+        <span class="perm-badge">tabs</span>
+        <p>Identifies which tab the video is in so play/pause events go to the right place.</p>
+      </div>
+      <div class="perm-item">
+        <span class="perm-badge">scripting + webNavigation</span>
+        <p>Injects the sync logic into every frame of a video page (some sites put the player in a cross-origin iframe) and routes messages to the correct frame.</p>
+      </div>
+      <div class="perm-item">
+        <span class="perm-badge">&lt;all_urls&gt;</span>
+        <p>Duet works on any site with an HTML5 <code>&lt;video&gt;</code> element. This permission is required to detect a video regardless of the site you're on. The extension reads only the video's playback state, the page URL, and the page title.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Third parties</h2>
+    <ul>
+      <li><strong>Google Firebase / Google Cloud Platform.</strong> All sync traffic flows through a Firebase Realtime Database hosted on Google's infrastructure. Your usage of Duet is therefore also subject to Google's privacy practices. See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a>.</li>
+      <li><strong>No analytics, advertising, error reporting, or telemetry SDKs</strong> are bundled with Duet.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Children</h2>
+    <p>Duet is not directed at children under 13 and does not knowingly collect data from them.</p>
+  </section>
+
+  <section>
+    <h2>Changes</h2>
+    <p>If this policy changes in a material way, the new version will ship in a release of the extension and be visible in the GitHub repository. The "Last updated" date at the top will move.</p>
+  </section>
+
+  <section>
+    <h2>Contact</h2>
+    <p>For questions about this policy, open an issue on the <a href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">Duet GitHub repository</a>.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; 2026 Duet &nbsp;&middot;&nbsp; <a href="https://github.com/eliudmichira/DuetWatch" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>
