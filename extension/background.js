@@ -7,10 +7,18 @@
 const DEBUG = false;
 const dlog = (...args) => { if (DEBUG) console.log(...args); };
 
-importScripts(
-  "vendor/firebase-app-compat.js",
-  "vendor/firebase-database-compat.js"
-);
+// importScripts is used by Chrome MV3 service workers.
+// Firefox MV3 uses background.scripts[] in the manifest instead — the build
+// script (build-firefox.ps1) strips these lines and injects the vendor files
+// via manifest.firefox.json's background.scripts array, so they are already
+// loaded before this script runs. The guard below makes background.js safe to
+// run in both environments without modification.
+if (typeof importScripts === "function") {
+  importScripts(
+    "vendor/firebase-app-compat.js",
+    "vendor/firebase-database-compat.js"
+  );
+}
 
 // ── Firebase Config ─────────────────────────────────────────
 // Hosted-only for v1. Every install talks to the same developer-managed
