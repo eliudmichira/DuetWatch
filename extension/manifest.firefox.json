@@ -11,6 +11,15 @@
     }
   },
 
+  "data_collection_permissions": {
+    "required": [
+      "personalInfo",
+      "browsingActivity",
+      "personalCommunications"
+    ],
+    "optional": []
+  },
+
   "permissions": [
     "storage",
     "scripting",
